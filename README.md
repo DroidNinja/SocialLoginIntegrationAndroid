@@ -1,6 +1,7 @@
 # SocialLoginIntegrationAndroid
 Android Project with helper classes for login through facebook, twitter and google
 
+![demo](http://i.imgur.com/R7XnpAC.png)
 I have used following libraries:
 
 **For Google Login**
