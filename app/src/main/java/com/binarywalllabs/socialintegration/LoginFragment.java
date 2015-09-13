@@ -12,6 +12,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.binarywalllabs.socialintegration.helpers.FbConnectHelper;
+import com.binarywalllabs.socialintegration.helpers.GooglePlusSignInHelper;
+import com.binarywalllabs.socialintegration.helpers.TwitterConnectHelper;
 import com.binarywalllabs.socialintegration.managers.SharedPreferenceManager;
 import com.binarywalllabs.socialintegration.model.UserModel;
 import com.facebook.GraphResponse;

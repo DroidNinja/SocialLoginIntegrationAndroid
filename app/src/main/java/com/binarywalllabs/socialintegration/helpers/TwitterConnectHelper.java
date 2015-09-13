@@ -1,4 +1,4 @@
-package com.binarywalllabs.socialintegration;
+package com.binarywalllabs.socialintegration.helpers;
 
 import android.app.Activity;
 import android.content.Intent;

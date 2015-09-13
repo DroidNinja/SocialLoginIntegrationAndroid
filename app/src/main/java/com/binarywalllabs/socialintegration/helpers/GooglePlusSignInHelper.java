@@ -1,4 +1,4 @@
-package com.binarywalllabs.socialintegration;
+package com.binarywalllabs.socialintegration.helpers;
 
 /**
  * Created by Arun on 06-09-2015.
