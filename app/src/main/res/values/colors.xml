@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="window_background">#FFF5F5F5</color>
+    <color name="green_050">#d0f8ce</color> <!-- Use with black text -->
+    <color name="green_100">#a3e9a4</color> <!-- Use with black text -->
+    <color name="green_200">#72d572</color> <!-- Use with black text -->
+    <color name="green_300">#42bd41</color> <!-- Use with black text -->
+    <color name="green_400">#2baf2b</color> <!-- Use with black text -->
+    <color name="green_500">#259b24</color> <!-- Use with white text -->
+    <color name="green_600">#0a8f08</color> <!-- Use with white text -->
+    <color name="green_700">#0a7e07</color> <!-- Use with white text -->
+    <color name="green_800">#056f00</color> <!-- Use with white text -->
+    <color name="green_900">#0d5302</color> <!-- Use with white text -->
+    <color name="green_a100">#a2f78d</color> <!-- Use with black text -->
+    <color name="green_a200">#5af158</color> <!-- Use with black text -->
+    <color name="green_a400">#14e715</color> <!-- Use with black text -->
+    <color name="green_a700">#12c700</color> <!-- Use with black text -->
+
+    <color name="amber_050">#fff8e1</color> <!-- Use with black text -->
+    <color name="amber_100">#ffecb3</color> <!-- Use with black text -->
+    <color name="amber_200">#ffe082</color> <!-- Use with black text -->
+    <color name="amber_300">#ffd54f</color> <!-- Use with black text -->
+    <color name="amber_400">#ffca28</color> <!-- Use with black text -->
+    <color name="amber_500">#ffc107</color> <!-- Use with black text -->
+    <color name="amber_600">#ffb300</color> <!-- Use with black text -->
+    <color name="amber_700">#ffa000</color> <!-- Use with black text -->
+    <color name="amber_800">#ff8f00</color> <!-- Use with black text -->
+    <color name="amber_900">#ff6f00</color> <!-- Use with black text -->
+    <color name="amber_a100">#ffe57f</color> <!-- Use with black text -->
+    <color name="amber_a200">#ffd740</color> <!-- Use with black text -->
+    <color name="amber_a400">#ffc400</color> <!-- Use with black text -->
+    <color name="amber_a700">#ffab00</color> <!-- Use with black text -->
+
+    <color name="fb_color">#44619C</color>
+    <color name="g_color">#DD4C39</color>
+    <color name="twitter_color">#55ACEE</color>
+</resources>

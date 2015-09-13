@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:background="?attr/colorPrimaryDark"
+    android:layout_height="200dp"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="bottom">
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/user_imageview"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        fresco:actualImageScaleType="focusCrop"
+        fresco:roundAsCircle="true"
+        android:layout_marginTop="10dp"
+        />
+
+    <TextView
+        android:id="@+id/name_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Arun Sharma"
+        android:textSize="20sp"
+        android:layout_below="@id/user_imageview"
+        android:layout_marginTop="10dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+
+
+    <TextView
+        android:id="@+id/email_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Navigation Drawer"
+        android:fontFamily="sans-serif-light"
+        android:layout_marginTop="5dp"
+        android:layout_below="@id/name_textview"
+        android:layout_centerHorizontal="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+
+    </LinearLayout>
+</RelativeLayout>
