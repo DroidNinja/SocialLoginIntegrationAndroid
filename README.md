@@ -21,7 +21,10 @@ I have used following libraries:
 
     https://console.developers.google.com/apis/credentials
 
-4. Set this Client id before using instance of GooglePlusSignInHelper using GooglePlusSignInHelper.setClient(<YOUR CLIENT ID>)
+4. Set this Client id before using instance of GooglePlusSignInHelper :
+    ```
+    GooglePlusSignInHelper.setClient(<YOUR CLIENT ID>)
+    ```
 
 
 **For Facebook Login**
