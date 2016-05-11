@@ -11,12 +11,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion "22.0.1"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
         applicationId "com.binarywalllabs.socialintegration"
-        minSdkVersion 15
+        minSdkVersion 16
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
@@ -36,14 +36,13 @@ repositories {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:22.2.1'
-    compile 'com.android.support:design:22.2.1'
-    compile 'com.google.android.gms:play-services-base:7.8.0'
-    compile 'com.google.android.gms:play-services-plus:7.8.0'
+    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.android.support:design:23.3.0'
+    compile 'com.google.android.gms:play-services-auth:8.4.0'
     compile 'com.facebook.android:facebook-android-sdk:4.5.0'
     compile 'com.jakewharton:butterknife:7.0.1'
-    compile 'com.facebook.fresco:fresco:0.7.0+'
-    compile('com.twitter.sdk.android:twitter:1.8.0@aar') {
+    compile 'com.facebook.fresco:fresco:0.10.0'
+    compile('com.twitter.sdk.android:twitter:1.13.1@aar') {
         transitive = true;
     }
 }

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/SocialIntegration.iml" filepath="$PROJECT_DIR$/SocialIntegration.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SocialLoginIntegrationAndroid.iml" filepath="$PROJECT_DIR$/SocialLoginIntegrationAndroid.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

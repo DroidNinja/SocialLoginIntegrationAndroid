@@ -8,236 +8,160 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
+import com.facebook.GraphResponse;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.plus.Plus;
-import com.google.android.gms.plus.model.people.Person;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+
 
 /**
  * GooglePlusSignInHelper.java
  * This is helper class to use for google+ sign in.
  * For Error code refer : https://developers.google.com/android/reference/com/google/android/gms/common/ConnectionResult
  */
-public class GooglePlusSignInHelper implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    private static final int STATE_DEFAULT = 0;
-    private static final int STATE_SIGN_IN = 1;
-    private static final int STATE_IN_PROGRESS = 2;
-    private static final int RC_SIGN_IN = 28;
-    // We use mSignInProgress to track whether user has clicked sign in.
-    // mSignInProgress can be one of three values:
-    //
-    //       STATE_DEFAULT: The default state of the application before the user
-    //                      has clicked 'sign in', or after they have clicked
-    //                      'sign out'.  In this state we will not attempt to
-    //                      resolve sign in errors and so will display our
-    //                      Activity in a signed out state.
-    //       STATE_SIGN_IN: This state indicates that the user has clicked 'sign
-    //                      in', so resolve successive errors preventing sign in
-    //                      until the user has successfully authorized an account
-    //                      for our app.
-    //   STATE_IN_PROGRESS: This state indicates that we have started an intent to
-    //                      resolve an error, and so we should not start further
-    //                      intents until the current intent completes.
-    private int mSignInProgress;
-    // GoogleApiClient wraps our service connection to Google Play services and
-    // provides access to the users sign in state and Google's APIs.
-    private GoogleApiClient mGoogleApiClient;
+public class GooglePlusSignInHelper {
+    private final static String TAG = "GooglePlusSignInHelper";
+        private final static int RC_SIGN_IN = 100;
+        private static GoogleSignInOptions gso;
 
-    // Used to store the PendingIntent most recently returned by Google Play
-    // services until the user clicks 'sign in'.
-    private PendingIntent mSignInIntent;
+        private static GooglePlusSignInHelper sInstance;
+        private static String webClientID;
+        private GoogleApiClient googleApiClient;
+        private Context context;
+        private OnGoogleSignInListener loginResultCallback;
+        private ResultCallback<Status> logoutResultCallback;
 
-    // Used to store the error code most recently returned by Google Play services
-    // until the user clicks 'sign in'.
-    private int mSignInError;
-    // Activity instance
-    private Activity mActivity;
     /**
-     * Google + sign in Listener
+     * This method should be called before calling any instance.
+     * This is neccessary to get access token and id of user.
+     * @param googleClientId
      */
-    private OnGoogleSignInListener mOnGoogleSignInListener;
+    public static void setClientID(String googleClientId) {
+        webClientID = googleClientId;
+    }
 
     /**
-     * Interface to listen the Google+ sign in
+     * Interface to listen the Google login
      */
     public interface OnGoogleSignInListener {
-        void OnGSignSuccess(Person mPerson, String emailAddress);
+        void OnGSignSuccess(GoogleSignInAccount graphResponse);
 
-        void OnGSignError(String errorMessage);
+        void OnGSignError(GoogleSignInResult errorMessage);
     }
 
-    public GooglePlusSignInHelper(Activity mActivity, OnGoogleSignInListener mOnGoogleSignInListener) {
-        this.mActivity = mActivity;
-        mGoogleApiClient = getGoogleApiClientInstance();
-        this.mOnGoogleSignInListener = mOnGoogleSignInListener;
-    }
-
-    public GoogleApiClient getGoogleApiClientInstance()
-    {
-        if(mGoogleApiClient==null)
-            mGoogleApiClient = buildGoogleApiClient();
-        return mGoogleApiClient;
-    }
-
-    /**
-     * Connect to google+
-     */
-    public void connect() {
-        mSignInProgress = STATE_SIGN_IN;
-        mGoogleApiClient.connect();
-    }
-
-    /**
-     * Call this method in your onStart()
-     */
-    public void onStart() {
-        if (mGoogleApiClient!=null && mSignInProgress == STATE_SIGN_IN)
-            mGoogleApiClient.connect();
-    }
-
-    /**
-     * Call this method in your OnStop()
-     */
-    public void onStop() {
-        if (mGoogleApiClient!=null && mGoogleApiClient.isConnected()) {
-            mGoogleApiClient.disconnect();
-        }
-    }
-
-    /**
-     * To signOut from the application.
-     */
-    public void signOut() {
-        if (mGoogleApiClient.isConnected()) {
-            Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-            mGoogleApiClient.disconnect();
-        }
-    }
-
-    /**
-     * To revoke the App permission
-     */
-    public void revokeAccess() {
-        // After we revoke permissions for the user with a GoogleApiClient
-        // instance, we must discard it and create a new one.
-        Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-        // Our sample has caches no user data from Google+, however we
-        // would normally register a callback on revokeAccessAndDisconnect
-        // to delete user data so that we comply with Google developer
-        // policies.
-        Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient);
-    }
-
-
-    private GoogleApiClient buildGoogleApiClient() {
-        // When we build the GoogleApiClient we specify where connected and
-        // connection failed callbacks should be returned, which Google APIs our
-        // app uses and which OAuth 2.0 scopes our app requests.
-        GoogleApiClient.Builder builder = new GoogleApiClient.Builder(mActivity.getApplicationContext())
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Plus.API, Plus.PlusOptions.builder().build())
-                .addScope(Plus.SCOPE_PLUS_LOGIN);
-        return builder.build();
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        // Retrieve some profile information to personalize our app for the user.
-        Person currentUser = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-        String emailAddress = Plus.AccountApi.getAccountName(mGoogleApiClient);
-        mOnGoogleSignInListener.OnGSignSuccess(currentUser, emailAddress);
-        // Indicate that the sign in process is complete.
-        mSignInProgress = STATE_DEFAULT;
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        // The connection to Google Play services was lost for some reason.
-        // We call connect() to attempt to re-establish the connection or get a
-        // ConnectionResult that we can attempt to resolve.
-        mGoogleApiClient.connect();
-    }
-
-    /* onConnectionFailed is called when our Activity could not connect to Google
-    * Play services.  onConnectionFailed indicates that the user needs to select
-    * an account, grant permissions or resolve an error in order to sign in.
-    */
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        if (connectionResult.getErrorCode() == ConnectionResult.API_UNAVAILABLE) {
-            mOnGoogleSignInListener.OnGSignError("Google play service unavailable");
-        } else if (mSignInProgress != STATE_IN_PROGRESS) {
-            // We do not have an intent in progress so we should store the latest
-            // error resolution intent for use when the sign in button is clicked.
-            mSignInIntent = connectionResult.getResolution();
-            mSignInError = connectionResult.getErrorCode();
-            if (mSignInProgress == STATE_SIGN_IN) {
-                // STATE_SIGN_IN indicates the user already clicked the sign in button
-                // so we should continue processing errors until the user is signed in
-                // or they click cancel.
-                resolveSignInError();
+        public static GooglePlusSignInHelper getInstance() {
+            if (sInstance == null) {
+                sInstance = new GooglePlusSignInHelper();
             }
+            return sInstance;
         }
-    }
 
-    /* Starts an appropriate intent or dialog for user interaction to resolve
-   * the current error preventing the user from being signed in.  This could
-   * be a dialog allowing the user to select an account, an activity allowing
-   * the user to consent to the permissions being requested by your app, a
-   * setting to enable device networking, etc.
-   */
-    private void resolveSignInError() {
-        if (mSignInIntent != null) {
-            // We have an intent which will allow our user to sign in or
-            // resolve an error.  For example if the user needs to
-            // select an account to sign in with, or if they need to consent
-            // to the permissions your app is requesting.
-            try {
-                // Send the pending intent that we stored on the most recent
-                // OnConnectionFailed callback.  This will allow the user to
-                // resolve the error currently preventing our connection to
-                // Google Play services.
-                mSignInProgress = STATE_IN_PROGRESS;
-                mActivity.startIntentSenderForResult(mSignInIntent.getIntentSender(),
-                        RC_SIGN_IN, null, 0, 0, 0);
-            } catch (IntentSender.SendIntentException e) {
-                // The intent was canceled before it was sent.  Attempt to connect to
-                // get an updated ConnectionResult.
-                mSignInProgress = STATE_SIGN_IN;
-                mGoogleApiClient.connect();
-            }
-        } else {
-            // Google Play services wasn't able to provide an intent for some
-            // error types, so we show the default Google Play services error
-            // dialog which may still start an intent on our behalf if the
-            // user can resolve the issue.
-            mOnGoogleSignInListener.OnGSignError("Unknown error occurred");
+        private GooglePlusSignInHelper() {
+            // Configure sign-in to request the user's ID, email address, and basic
+            // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+            gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestProfile() //for profile related info
+                    .requestEmail() //for email
+                    .requestIdToken(webClientID) //for accessToken and id
+                    .build();
         }
-    }
 
+        public void initialize(FragmentActivity activity, OnGoogleSignInListener onGoogleSignInListener)
+        {
+            loginResultCallback = onGoogleSignInListener;
+            context = activity;
+            googleApiClient = new GoogleApiClient.Builder(activity)
+                    .enableAutoManage(activity /* FragmentActivity */, new GoogleApiClient.OnConnectionFailedListener() {
+                        @Override
+                        public void onConnectionFailed(ConnectionResult connectionResult) {
+                            Log.e(TAG, "onConnectionFailed: " + connectionResult);
+                        }
+                    } /* OnConnectionFailedListener */)
+                    .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                    .build();
 
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case RC_SIGN_IN:
-                if (resultCode == Activity.RESULT_OK) {
-                    // If the error resolution was successful we should continue
-                    // processing errors.
-                    mSignInProgress = STATE_SIGN_IN;
-                } else {
-                    // If the error resolution was not successful or the user canceled,
-                    // we should stop processing errors.
-                    mSignInProgress = STATE_DEFAULT;
+            googleApiClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                @Override
+                public void onConnected(Bundle bundle) {
+                    Log.i(TAG, "onConnected");
                 }
 
-                if (!mGoogleApiClient.isConnecting()) {
-                    // If Google Play services resolved the issue with a dialog then
-                    // onStart is not called so we need to re-attempt connection here.
-                    mGoogleApiClient.connect();
+                @Override
+                public void onConnectionSuspended(int i) {
+                    Log.i(TAG, "onConnectionSuspended");
                 }
-                break;
+            });
+
+            googleApiClient.registerConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                @Override
+                public void onConnectionFailed(ConnectionResult connectionResult) {
+                    Log.i(TAG, "onConnectionFailed");
+                }
+            });
         }
-    }
+
+        public boolean isConnected() {
+            boolean isConnected = googleApiClient.isConnected();
+
+            Log.i(TAG, "isConnected()" + isConnected);
+            return isConnected;
+        }
+
+        public void signIn(Activity activity) {
+            Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+            activity.startActivityForResult(signInIntent, RC_SIGN_IN);
+        }
+
+        public void signOut() {
+            Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(
+                    new ResultCallback<Status>() {
+                        @Override
+                        public void onResult(Status status) {
+                            if (logoutResultCallback != null) {
+                                logoutResultCallback.onResult(status);
+                            }
+                        }
+                    });
+        }
+
+        private void handleSignInResult(GoogleSignInResult result) {
+            Log.d(TAG, "handleSignInResult:" + result.isSuccess());
+            if (result.isSuccess()) {
+                Log.i(TAG, "Signed in");
+                // Signed in successfully, show authenticated UI.
+                GoogleSignInAccount acct = result.getSignInAccount();
+
+                if (loginResultCallback != null) {
+                    loginResultCallback.OnGSignSuccess(acct);
+                }
+            } else {
+                Log.i(TAG, "Signed out");
+
+                if (loginResultCallback != null) {
+                    loginResultCallback.OnGSignError(result);
+                }
+            }
+        }
+
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+            if (requestCode == RC_SIGN_IN) {
+                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+                handleSignInResult(result);
+            }
+        }
+
+        public void setLogoutResultCallback(ResultCallback<Status> callback) {
+            logoutResultCallback = callback;
+        }
 }

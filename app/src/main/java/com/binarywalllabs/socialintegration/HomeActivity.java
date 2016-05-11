@@ -2,6 +2,7 @@ package com.binarywalllabs.socialintegration;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -29,13 +30,10 @@ public class HomeActivity extends AppCompatActivity {
     @Bind(R.id.drawer_layout)
     DrawerLayout drawerLayout;
 
-    @Bind(R.id.user_imageview)
     SimpleDraweeView simpleDraweeView;
 
-    @Bind(R.id.name_textview)
     TextView nameTextView;
 
-    @Bind(R.id.email_textview)
     TextView emailTextView;
 
     @Override
@@ -80,8 +78,15 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void setupDrawerContent(UserModel userModel) {
+        View headerView = navigationView.getHeaderView(0);
+
+        simpleDraweeView = ButterKnife.findById(headerView, R.id.user_imageview);
         simpleDraweeView.setImageURI(Uri.parse(userModel.profilePic));
+
+        nameTextView = ButterKnife.findById(headerView, R.id.name_textview);
         nameTextView.setText(userModel.userName);
+
+        emailTextView = ButterKnife.findById(headerView, R.id.email_textview);
         emailTextView.setText(userModel.userEmail);
     }
 

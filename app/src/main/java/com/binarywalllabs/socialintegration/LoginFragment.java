@@ -2,6 +2,7 @@ package com.binarywalllabs.socialintegration;
 
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -12,13 +13,15 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.binarywalllabs.socialintegration.constants.AppConstants;
 import com.binarywalllabs.socialintegration.helpers.FbConnectHelper;
 import com.binarywalllabs.socialintegration.helpers.GooglePlusSignInHelper;
 import com.binarywalllabs.socialintegration.helpers.TwitterConnectHelper;
 import com.binarywalllabs.socialintegration.managers.SharedPreferenceManager;
 import com.binarywalllabs.socialintegration.model.UserModel;
 import com.facebook.GraphResponse;
-import com.google.android.gms.plus.model.people.Person;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.twitter.sdk.android.core.models.User;
 
 import org.json.JSONException;
@@ -71,14 +74,17 @@ public class LoginFragment extends Fragment implements TwitterConnectHelper.OnTw
     }
 
     private void setup() {
-        gSignInHelper = new GooglePlusSignInHelper(getActivity(), this);
+        GooglePlusSignInHelper.setClientID(AppConstants.GOOGLE_CLIENT_ID);
+        gSignInHelper = GooglePlusSignInHelper.getInstance();
+        gSignInHelper.initialize(getActivity(), this);
+
         fbConnectHelper = new FbConnectHelper(this,this);
         twitterConnectHelper = new TwitterConnectHelper(getActivity(), this);
     }
 
     @OnClick(R.id.login_google)
     public void loginwithGoogle(View view) {
-        gSignInHelper.connect();
+        gSignInHelper.signIn(getActivity());
         setBackground(R.color.g_color);
     }
 
@@ -150,19 +156,25 @@ public class LoginFragment extends Fragment implements TwitterConnectHelper.OnTw
     }
 
     @Override
-    public void OnGSignSuccess(Person mPerson, String emailAddress) {
+    public void OnGSignSuccess(GoogleSignInAccount acct) {
         UserModel userModel = new UserModel();
-        userModel.userName = mPerson.getDisplayName();
-        userModel.userEmail = emailAddress;
-        userModel.profilePic = mPerson.getImage().getUrl();
+        userModel.userName = (acct.getDisplayName()==null)?"":acct.getDisplayName();
+        userModel.userEmail = acct.getEmail();
+
+        Uri photoUrl = acct.getPhotoUrl();
+        if(photoUrl!=null)
+            userModel.profilePic = photoUrl.toString();
+        else
+            userModel.profilePic = "";
+        Log.i(TAG, acct.getIdToken());
 
         SharedPreferenceManager.getSharedInstance().saveUserModel(userModel);
         startHomeActivity(userModel);
     }
 
     @Override
-    public void OnGSignError(String errorMessage) {
-        resetToDefaultView(errorMessage);
+    public void OnGSignError(GoogleSignInResult errorMessage) {
+        resetToDefaultView("Google Sign in error@");
     }
 
     private void startHomeActivity(UserModel userModel)
