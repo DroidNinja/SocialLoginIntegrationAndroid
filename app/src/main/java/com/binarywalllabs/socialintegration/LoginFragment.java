@@ -22,6 +22,7 @@ import com.binarywalllabs.socialintegration.model.UserModel;
 import com.facebook.GraphResponse;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.plus.model.people.Person;
 import com.twitter.sdk.android.core.models.User;
 
 import org.json.JSONException;
@@ -156,10 +157,25 @@ public class LoginFragment extends Fragment implements TwitterConnectHelper.OnTw
     }
 
     @Override
-    public void OnGSignSuccess(GoogleSignInAccount acct) {
+    public void OnGSignSuccess(GoogleSignInAccount acct, Person person) {
         UserModel userModel = new UserModel();
         userModel.userName = (acct.getDisplayName()==null)?"":acct.getDisplayName();
         userModel.userEmail = acct.getEmail();
+
+        Log.i(TAG, "OnGSignSuccess: AccessToken "+ acct.getIdToken());
+
+        if(person!=null) {
+            int gender = person.getGender();
+
+            if (gender == 0)
+                userModel.gender = "MALE";
+            else if (gender == 1)
+                userModel.gender = "FEMALE";
+            else
+                userModel.gender = "OTHERS";
+
+            Log.i(TAG, "OnGSignSuccess: gender "+ userModel.gender);
+        }
 
         Uri photoUrl = acct.getPhotoUrl();
         if(photoUrl!=null)

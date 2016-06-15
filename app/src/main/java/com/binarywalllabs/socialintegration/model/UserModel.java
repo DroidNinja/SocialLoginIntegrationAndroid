@@ -11,6 +11,7 @@ public class UserModel implements Parcelable {
     public String userName;
     public String userEmail;
     public String profilePic;
+    public String gender;
 
     public static final Creator<UserModel> CREATOR = new Creator<UserModel>() {
 
@@ -33,6 +34,7 @@ public class UserModel implements Parcelable {
         userName = parcel.readString();
         userEmail = parcel.readString();
         profilePic = parcel.readString();
+        gender = parcel.readString();
     }
 
 
@@ -41,6 +43,7 @@ public class UserModel implements Parcelable {
         parcel.writeString(userName);
         parcel.writeString(userEmail);
         parcel.writeString(profilePic);
+        parcel.writeString(gender);
     }
 
     @Override

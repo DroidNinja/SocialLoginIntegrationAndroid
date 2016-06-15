@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
@@ -19,9 +21,14 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.plus.People;
+import com.google.android.gms.plus.Plus;
+import com.google.android.gms.plus.model.people.Person;
 
 
 /**
@@ -54,7 +61,7 @@ public class GooglePlusSignInHelper {
      * Interface to listen the Google login
      */
     public interface OnGoogleSignInListener {
-        void OnGSignSuccess(GoogleSignInAccount graphResponse);
+        void OnGSignSuccess(GoogleSignInAccount googleSignInAccount, @Nullable Person person);
 
         void OnGSignError(GoogleSignInResult errorMessage);
     }
@@ -70,6 +77,7 @@ public class GooglePlusSignInHelper {
             // Configure sign-in to request the user's ID, email address, and basic
             // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
             gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestScopes(new Scope(Scopes.PLUS_LOGIN))
                     .requestProfile() //for profile related info
                     .requestEmail() //for email
                     .requestIdToken(webClientID) //for accessToken and id
@@ -88,6 +96,7 @@ public class GooglePlusSignInHelper {
                         }
                     } /* OnConnectionFailedListener */)
                     .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                    .addApi(Plus.API)
                     .build();
 
             googleApiClient.registerConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
@@ -139,11 +148,32 @@ public class GooglePlusSignInHelper {
             if (result.isSuccess()) {
                 Log.i(TAG, "Signed in");
                 // Signed in successfully, show authenticated UI.
-                GoogleSignInAccount acct = result.getSignInAccount();
+                final GoogleSignInAccount acct = result.getSignInAccount();
 
-                if (loginResultCallback != null) {
-                    loginResultCallback.OnGSignSuccess(acct);
+                //This code is just for getting google plus information like gender, birthday, aboutme etc
+                final Person[] person = {null};
+                if(acct!=null) {
+                    Plus.PeopleApi.load(googleApiClient, acct.getId()).setResultCallback(new ResultCallback<People.LoadPeopleResult>() {
+                        @Override
+                        public void onResult(@NonNull People.LoadPeopleResult loadPeopleResult) {
+                            try {
+                                person[0] = loadPeopleResult.getPersonBuffer().get(0);
+                            }
+                            finally {
+                                loadPeopleResult.getPersonBuffer().release();
+                            }
+                            if (loginResultCallback != null) {
+                                loginResultCallback.OnGSignSuccess(acct, person[0]);
+                            }
+                        }
+                    });
                 }
+//                //If you don't want google+ related info, just comment above code, uncomment below callback
+//                if (loginResultCallback != null) {
+//                    //In this case, person object will always be null
+//                    loginResultCallback.OnGSignSuccess(acct, null);
+//                }
+
             } else {
                 Log.i(TAG, "Signed out");
 

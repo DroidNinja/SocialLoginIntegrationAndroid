@@ -8,7 +8,7 @@ I have used following libraries:
 
 **For Google Login**
 ```
-  compile 'com.google.android.gms:play-services-auth:8.4.0'
+  compile 'com.google.android.gms:play-services-auth:9.0.2'
 ```
 
 1. Create app in Google Developer Console by filling out this form: 
@@ -22,9 +22,22 @@ I have used following libraries:
     https://console.developers.google.com/apis/credentials
 
 4. Set this Client id before using instance of GooglePlusSignInHelper :
+    
     ```
     GooglePlusSignInHelper.setClient(<YOUR CLIENT ID>)
     ```
+
+Note: If you want google+ information, you need to do following steps:
+    1. Make sure that Google+ Api is enabled in Google Developer Console.
+        
+    2. Include this dependency:
+        
+
+```
+  compile 'com.google.android.gms:play-services-plus:9.0.2'
+```
+
+    3. Then, you can access all information through person object in GoogleSignHelper success callback.
 
 
 **For Facebook Login**
