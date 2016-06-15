@@ -28,16 +28,16 @@ I have used following libraries:
     ```
 
 Note: If you want google+ information, you need to do following steps:
-    1. Make sure that Google+ Api is enabled in Google Developer Console.
-        
-    2. Include this dependency:
-        
+  
+  1. Make sure that Google+ Api is enabled in Google Developer Console.
+
+  2. Include this dependency:
 
 ```
   compile 'com.google.android.gms:play-services-plus:9.0.2'
 ```
 
-    3. Then, you can access all information through person object in GoogleSignHelper success callback.
+  3. Then, you can access all information through person object in GoogleSignHelper success callback.
 
 
 **For Facebook Login**
