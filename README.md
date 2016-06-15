@@ -37,7 +37,7 @@ Note: If you want google+ information, you need to do following steps:
   compile 'com.google.android.gms:play-services-plus:9.0.2'
 ```
 
-  3. Then, you can access all information through person object in GoogleSignHelper success callback.
+ Then, you can access all information through person object in GooglePlusSignInHelper success callback.
 
 
 **For Facebook Login**
